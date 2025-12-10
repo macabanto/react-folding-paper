@@ -13,6 +13,24 @@ function App() {
 	return (
 		<>
 			{/* Main Scene - Full viewport */}
+			{/* Instructions overlay */}
+			<div
+				style={{
+					position: "absolute",
+					bottom: "20px",
+					right: "20px",
+					color: "white",
+					backgroundColor: "rgba(0, 0, 0, 0.6)",
+					padding: "10px 15px",
+					borderRadius: "5px",
+					fontSize: "14px",
+					fontFamily: "sans-serif",
+					pointerEvents: "none",
+					zIndex: 1,
+				}}
+			>
+				Hold <strong>Shift</strong> + drag to roll camera
+			</div>
 			<Canvas
 				camera={{ position: [5, 5, 5], fov: 75 }}
 				style={{
@@ -47,8 +65,8 @@ function App() {
 			>
 				<UnityCube mainCameraRef={mainCameraRef} />
 			</Canvas>
-      <Z_Compass mainCameraRef={mainCameraRef} />
 
+			<Z_Compass mainCameraRef={mainCameraRef} />
 		</>
 	);
 }
