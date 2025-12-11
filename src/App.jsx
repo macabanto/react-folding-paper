@@ -93,7 +93,7 @@ function App() {
 					alignItems: "flex-end",
 				}}
 			>
-			<Pinch/>
+				<Pinch />
 			</div>
 		</>
 	);
