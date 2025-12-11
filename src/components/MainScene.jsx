@@ -30,7 +30,7 @@ function MainScene() {
 
       {/* Grid */}
       <gridHelper 
-        args={[10, 20, 0xcccccc, 0xcccccc]} 
+        args={[5, 12, 0xcccccc, 0xcccccc]} 
         rotation={[Math.PI / 2, 0, 0]} 
       />
     </>

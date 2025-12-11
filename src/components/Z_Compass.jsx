@@ -84,8 +84,8 @@ function Z_Compass({ mainCameraRef }) {
     <svg
       style={{
         position: 'absolute',
-        bottom: '50px',
-        right: '50px',
+        bottom: '-10px',
+        right: '-10px',
         width: '170px',
         height: '170px',
         pointerEvents: 'none',

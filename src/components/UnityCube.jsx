@@ -63,16 +63,20 @@ function UnityCube({ mainCameraRef }) {
 			viewName = normal.z > 0 ? "front" : "back";
 		}
 
-		console.log("Clicked face:", viewName);
+    // calculate ditance from camera to scene origin
+  	const camera_distance = mainCameraRef.current.position.length(); // Use .length() instead
+		console.log("Camera distance: ", camera_distance);
+
+    console.log("Clicked face:", viewName);
 
 		// Snap main camera to view (bidirectional sync: Unity → Main)
 		const viewPositions = {
-			front: [0, 0, 10],
-			back: [0, 0, -10],
-			right: [10, 0, 0],
-			left: [-10, 0, 0],
-			top: [0, 10, 0],
-			bottom: [0, -10, 0],
+			front: [0, 0, camera_distance],
+			back: [0, 0, -camera_distance],
+			right: [camera_distance, 0, 0],
+			left: [-camera_distance, 0, 0],
+			top: [0, camera_distance, 0],
+			bottom: [0, -camera_distance, 0],
 		};
 
 		const targetPos = viewPositions[viewName];

@@ -3,6 +3,7 @@ import { Canvas } from "@react-three/fiber";
 import MainScene from "./components/MainScene";
 import UnityCube from "./components/UnityCube";
 import Z_Compass from "./components/Z_Compass";
+import Pinch from "./components/Pinch"; // Import the new component
 import Controls from "./components/Controls";
 import "./App.css";
 
@@ -31,6 +32,7 @@ function App() {
 			>
 				Hold <strong>Shift</strong> + drag to roll camera
 			</div>
+
 			<Canvas
 				camera={{ position: [5, 5, 5], fov: 75 }}
 				style={{
@@ -48,25 +50,51 @@ function App() {
 				<Controls />
 			</Canvas>
 
-			{/* Unity Cube - bottom-right corner */}
-			<Canvas
-				camera={{ position: [0, 0, 4], fov: 50 }}
+			{/* UI Panel - Unity Cube + Z Compass grouped together */}
+			<div
 				style={{
 					position: "absolute",
 					bottom: "60px",
 					right: "60px",
-					width: "150px",
-					height: "150px",
-					pointerEvents: "auto",
-					border: "2px solid #666", // Add border
-					borderRadius: "75px", // Round corners
-					boxShadow: "0 4px 12px rgba(0,0,0,0.3)", // Optional: drop shadow
+					display: "flex",
+					flexDirection: "column",
+					gap: "20px",
+					alignItems: "flex-end",
 				}}
 			>
-				<UnityCube mainCameraRef={mainCameraRef} />
-			</Canvas>
+				{/* Unity Cube Canvas */}
+				<Canvas
+					camera={{ position: [0, 0, 4], fov: 50 }}
+					style={{
+						width: "150px",
+						height: "150px",
+						pointerEvents: "auto",
+						border: "2px solid #666",
+						borderRadius: "75px",
+						boxShadow: "0 4px 12px rgba(0,0,0,0.3)",
+					}}
+				>
+					<UnityCube mainCameraRef={mainCameraRef} />
+				</Canvas>
 
-			<Z_Compass mainCameraRef={mainCameraRef} />
+				{/* Z Compass */}
+				<Z_Compass mainCameraRef={mainCameraRef} />
+			</div>
+
+			{/* UI Pinch Panel */}
+			<div
+				style={{
+					position: "absolute",
+					bottom: "60px",
+					left: "60px", // Adjusted to be left of other UI panel
+					display: "flex",
+					flexDirection: "column",
+					gap: "20px",
+					alignItems: "flex-end",
+				}}
+			>
+			<Pinch/>
+			</div>
 		</>
 	);
 }
