@@ -65,19 +65,55 @@ function UnityCube({ mainCameraRef }) {
 
 		console.log("Clicked face:", viewName);
 
-		// Snap main camera to view (bidirectional sync: Unity → Main)
+		// Calculate current distance from origin
+		const currentDistance = mainCameraRef.current.position.length();
+
+		// Find which world axis is currently closest to screen "up"
+		const currentUp = mainCameraRef.current.up.clone().normalize();
+
+		// Possible up directions (world axes, both positive and negative)
+		const upCandidates = [
+			new THREE.Vector3(0, 1, 0), // +Y
+			new THREE.Vector3(0, -1, 0), // -Y
+			new THREE.Vector3(1, 0, 0), // +X
+			new THREE.Vector3(-1, 0, 0), // -X
+			new THREE.Vector3(0, 0, 1), // +Z
+			new THREE.Vector3(0, 0, -1), // -Z
+		];
+
+		// Find closest axis to current up
+		let bestUp = upCandidates[0];
+		let maxDot = currentUp.dot(upCandidates[0]);
+
+		for (const candidate of upCandidates) {
+			const dotProduct = currentUp.dot(candidate);
+			if (dotProduct > maxDot) {
+				maxDot = dotProduct;
+				bestUp = candidate;
+			}
+		}
+
+		// Snap main camera to view, maintaining distance
 		const viewPositions = {
-			front: [0, 0, 10],
-			back: [0, 0, -10],
-			right: [10, 0, 0],
-			left: [-10, 0, 0],
-			top: [0, 10, 0],
-			bottom: [0, -10, 0],
+			front: [0, 0, 1],
+			back: [0, 0, -1],
+			right: [1, 0, 0],
+			left: [-1, 0, 0],
+			top: [0, 1, 0],
+			bottom: [0, -1, 0],
 		};
 
-		const targetPos = viewPositions[viewName];
-		if (targetPos && mainCameraRef?.current) {
-			mainCameraRef.current.position.set(...targetPos);
+		const targetDir = viewPositions[viewName];
+		if (targetDir && mainCameraRef?.current) {
+			// Set up to nearest axis
+			mainCameraRef.current.up.copy(bestUp);
+
+			// Scale direction by current distance
+			mainCameraRef.current.position.set(
+				targetDir[0] * currentDistance,
+				targetDir[1] * currentDistance,
+				targetDir[2] * currentDistance
+			);
 			mainCameraRef.current.lookAt(0, 0, 0);
 		}
 	};

@@ -1,36 +1,21 @@
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { Canvas } from "@react-three/fiber";
 import MainScene from "./components/MainScene";
-import UnityCube from "./components/UnityCube";
-import Z_Compass from "./components/Z_Compass";
 import Controls from "./components/Controls";
+import UIOverlay from "./components/UIOverlay";
 import "./App.css";
 
 function App() {
-	// Shared reference to main camera for bidirectional syncing
 	const mainCameraRef = useRef();
+	const [isShiftHeld, setIsShiftHeld] = useState(false);
+	
+	// Grid state
+	const [gridVisible, setGridVisible] = useState(true);
+	const [gridDivisions, setGridDivisions] = useState({ x: 10, y: 10 });
 
 	return (
 		<>
-			{/* Main Scene - Full viewport */}
-			{/* Instructions overlay */}
-			<div
-				style={{
-					position: "absolute",
-					bottom: "20px",
-					right: "20px",
-					color: "white",
-					backgroundColor: "rgba(0, 0, 0, 0.6)",
-					padding: "10px 15px",
-					borderRadius: "5px",
-					fontSize: "14px",
-					fontFamily: "sans-serif",
-					pointerEvents: "none",
-					zIndex: 1,
-				}}
-			>
-				Hold <strong>Shift</strong> + drag to roll camera
-			</div>
+			{/* Main Scene Canvas */}
 			<Canvas
 				camera={{ position: [5, 5, 5], fov: 75 }}
 				style={{
@@ -44,29 +29,23 @@ function App() {
 					mainCameraRef.current = camera;
 				}}
 			>
-				<MainScene />
-				<Controls />
+				<MainScene 
+					gridVisible={gridVisible}
+					gridDivisions={gridDivisions}
+				/>
+				<Controls isShiftHeld={isShiftHeld} />
 			</Canvas>
 
-			{/* Unity Cube - bottom-right corner */}
-			<Canvas
-				camera={{ position: [0, 0, 4], fov: 50 }}
-				style={{
-					position: "absolute",
-					bottom: "60px",
-					right: "60px",
-					width: "150px",
-					height: "150px",
-					pointerEvents: "auto",
-					border: "2px solid #666", // Add border
-					borderRadius: "75px", // Round corners
-					boxShadow: "0 4px 12px rgba(0,0,0,0.3)", // Optional: drop shadow
-				}}
-			>
-				<UnityCube mainCameraRef={mainCameraRef} />
-			</Canvas>
-
-			<Z_Compass mainCameraRef={mainCameraRef} />
+			{/* UI Overlay */}
+			<UIOverlay 
+				mainCameraRef={mainCameraRef} 
+				isShiftHeld={isShiftHeld}
+				onShiftChange={setIsShiftHeld}
+				gridVisible={gridVisible}
+				gridDivisions={gridDivisions}
+				onToggleGrid={setGridVisible}
+				onDivisionsChange={setGridDivisions}
+			/>
 		</>
 	);
 }
