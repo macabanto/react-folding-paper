@@ -1,12 +1,23 @@
 import { useRef, useState, useEffect } from "react";
 import { useThree, useFrame } from "@react-three/fiber";
+import { useTexture } from "@react-three/drei";
 import * as THREE from "three";
+
+import leftPinchIcon from "../assets/pinch_L_trans.png";
+import rightPinchIcon from "../assets/pinch_R_trans.png";
 
 function PinchTool({ gridDivisions, paperSize = 5, onCancel }) {
 	const { camera, raycaster, pointer, scene } = useThree();
 	const [cursorPosition, setCursorPosition] = useState(null);
-	const [placedPinches, setPlacedPinches] = useState([]); // Max 2
+	const [placedPinches, setPlacedPinches] = useState([]);
 	const [nearestVertex, setNearestVertex] = useState(null);
+
+	const leftTexture = useTexture(leftPinchIcon);
+	const rightTexture = useTexture(rightPinchIcon);
+
+	// Sprite anchor points
+	const LEFT_PINCH_CENTER = [0.9, 0.78];
+	const RIGHT_PINCH_CENTER = [0.1, 0.78];
 
 	// Handle ESC key or external cancel
 	useEffect(() => {
@@ -15,7 +26,7 @@ function PinchTool({ gridDivisions, paperSize = 5, onCancel }) {
 				setPlacedPinches([]);
 				setNearestVertex(null);
 				setCursorPosition(null);
-				if (onCancel) onCancel(); // Deactivate the tool
+				if (onCancel) onCancel();
 			}
 		};
 
@@ -28,7 +39,7 @@ function PinchTool({ gridDivisions, paperSize = 5, onCancel }) {
 		setPlacedPinches([]);
 		setNearestVertex(null);
 		setCursorPosition(null);
-	}, []); // Runs once on mount
+	}, []);
 
 	// Calculate all grid vertices on paper edges
 	const getEdgeVertices = () => {
@@ -61,9 +72,8 @@ function PinchTool({ gridDivisions, paperSize = 5, onCancel }) {
 
 	// Track cursor in 3D space
 	useFrame(() => {
-		if (placedPinches.length >= 2) return; // Both pinches placed
+		if (placedPinches.length >= 2) return;
 
-		// Raycast to paper plane
 		raycaster.setFromCamera(pointer, camera);
 		const plane = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0);
 		const intersection = new THREE.Vector3();
@@ -72,13 +82,11 @@ function PinchTool({ gridDivisions, paperSize = 5, onCancel }) {
 		if (intersection) {
 			setCursorPosition(intersection);
 
-			// Find nearest vertex
 			let nearest = null;
 			let minDist = Infinity;
-			const snapDistance = 0.3; // How close cursor needs to be
+			const snapDistance = 0.3;
 
 			for (const vertex of edgeVertices) {
-				// Skip if this vertex already has a pinch
 				const alreadyUsed = placedPinches.some(
 					(p) => p.distanceTo(vertex) < 0.01
 				);
@@ -111,15 +119,16 @@ function PinchTool({ gridDivisions, paperSize = 5, onCancel }) {
 
 	return (
 		<group>
-			{/* Cursor-following pinch (before placing) */}
 			{placedPinches.length < 2 && cursorPosition && (
 				<sprite
 					position={nearestVertex || cursorPosition}
-					scale={[0.3, 0.3, 1]}
+					scale={[2, 2, 1]}
+					center={
+						placedPinches.length === 0 ? LEFT_PINCH_CENTER : RIGHT_PINCH_CENTER
+					}
 				>
 					<spriteMaterial
-						color={nearestVertex ? "#00ff00" : "#ffffff"}
-						opacity={0.8}
+						map={placedPinches.length === 0 ? leftTexture : rightTexture}
 					/>
 				</sprite>
 			)}
@@ -127,15 +136,23 @@ function PinchTool({ gridDivisions, paperSize = 5, onCancel }) {
 			{/* Highlight nearest vertex */}
 			{nearestVertex && (
 				<mesh position={nearestVertex}>
-					<circleGeometry args={[0.15, 16]} />
+					<circleGeometry args={[0.05, 16]} />
 					<meshBasicMaterial color="#00ff00" opacity={0.5} transparent />
 				</mesh>
 			)}
 
 			{/* Placed pinches */}
 			{placedPinches.map((pos, i) => (
-				<sprite key={i} position={pos} scale={[0.3, 0.3, 1]}>
-					<spriteMaterial color="#ff0000" />
+				<sprite
+					key={i}
+					position={pos}
+					scale={[2, 2, 1]}
+					center={i === 0 ? LEFT_PINCH_CENTER : RIGHT_PINCH_CENTER}
+				>
+					<spriteMaterial
+						map={i === 0 ? leftTexture : rightTexture}
+						transparent
+					/>
 				</sprite>
 			))}
 
