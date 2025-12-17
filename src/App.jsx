@@ -13,9 +13,15 @@ function App() {
 	const [gridVisible, setGridVisible] = useState(true);
 	const [gridDivisions, setGridDivisions] = useState({ x: 10, y: 10 });
 
+	// Pinch tool state
+	const [pinchToolActive, setPinchToolActive] = useState(false);
+
+	const handleTogglePinchTool = () => {
+		setPinchToolActive(!pinchToolActive);
+	};
+
 	return (
 		<>
-			{/* Main Scene Canvas */}
 			<Canvas
 				camera={{ position: [5, 5, 5], fov: 75 }}
 				style={{
@@ -32,11 +38,13 @@ function App() {
 				<MainScene 
 					gridVisible={gridVisible}
 					gridDivisions={gridDivisions}
+					pinchToolActive={pinchToolActive}
+					onTogglePinchTool={handleTogglePinchTool}  // Add this line
+
 				/>
 				<Controls isShiftHeld={isShiftHeld} />
 			</Canvas>
 
-			{/* UI Overlay */}
 			<UIOverlay 
 				mainCameraRef={mainCameraRef} 
 				isShiftHeld={isShiftHeld}
@@ -45,6 +53,8 @@ function App() {
 				gridDivisions={gridDivisions}
 				onToggleGrid={setGridVisible}
 				onDivisionsChange={setGridDivisions}
+				pinchToolActive={pinchToolActive}
+				onTogglePinchTool={handleTogglePinchTool}
 			/>
 		</>
 	);

@@ -1,5 +1,6 @@
 import OrientationManager from './OrientationManager'
 import GridManager from './GridManager'
+import PinchToolButton from './PinchToolButton'
 import Hotkeys from './Hotkeys'
 
 function UIOverlay({ 
@@ -9,7 +10,9 @@ function UIOverlay({
   gridVisible,
   gridDivisions,
   onToggleGrid,
-  onDivisionsChange
+  onDivisionsChange,
+  pinchToolActive,
+  onTogglePinchTool
 }) {
   return (
     <>
@@ -25,6 +28,11 @@ function UIOverlay({
         gap: '20px',
         alignItems: 'flex-end'
       }}>
+        <PinchToolButton 
+          isActive={pinchToolActive}
+          onToggle={onTogglePinchTool}
+        />
+
         <GridManager
           gridVisible={gridVisible}
           gridDivisions={gridDivisions}

@@ -1,6 +1,7 @@
 import CustomGrid from "./CustomGrid";
+import PinchTool from "./PinchTool";
 
-function MainScene({ gridVisible, gridDivisions }) {
+function MainScene({ gridVisible, gridDivisions, pinchToolActive, onTogglePinchTool }) {
 	return (
 		<>
 			{/* Lighting */}
@@ -28,13 +29,22 @@ function MainScene({ gridVisible, gridDivisions }) {
 				/>
 			</mesh>
 
-			{/* Custom Grid with separate X/Y divisions */}
+			{/* Grid */}
 			{gridVisible && (
 				<CustomGrid
 					divisionsX={gridDivisions.x}
 					divisionsY={gridDivisions.y}
-					size={5} // Match paper size (was 10)
+					size={5}
 					color={0xcccccc}
+				/>
+			)}
+
+			{/* Pinch Tool */}
+			{pinchToolActive && (
+				<PinchTool
+					gridDivisions={gridDivisions}
+					paperSize={5}
+					onCancel={onTogglePinchTool} // Pass the toggle function
 				/>
 			)}
 		</>
