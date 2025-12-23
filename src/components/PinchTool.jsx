@@ -11,6 +11,7 @@ function PinchTool({ gridDivisions, paperSize = 5, onCancel }) {
 	const [cursorPosition, setCursorPosition] = useState(null);
 	const [placedPinches, setPlacedPinches] = useState([]);
 	const [nearestVertex, setNearestVertex] = useState(null);
+	const [firstPinchIsRight, setFirstPinchIsRight] = useState(null);
 
 	const leftTexture = useTexture(leftPinchIcon);
 	const rightTexture = useTexture(rightPinchIcon);
@@ -109,6 +110,11 @@ function PinchTool({ gridDivisions, paperSize = 5, onCancel }) {
 			if (placedPinches.length >= 2) return;
 			if (!nearestVertex) return;
 
+			// Determine which hand based on X position (first pinch only)
+			if (placedPinches.length === 0) {
+				setFirstPinchIsRight(nearestVertex.x > 0); // Right side = right hand
+			}
+
 			setPlacedPinches([...placedPinches, nearestVertex.clone()]);
 			setNearestVertex(null);
 		};
@@ -119,24 +125,55 @@ function PinchTool({ gridDivisions, paperSize = 5, onCancel }) {
 
 	return (
 		<group>
+			{/* Show all available edge vertices when tool is active AND not all pinches placed */}
+			{placedPinches.length < 2 &&
+				edgeVertices.map((vertex, i) => {
+					// Check if this vertex already has a pinch
+					const isOccupied = placedPinches.some(
+						(p) => p.distanceTo(vertex) < 0.01
+					);
+
+					return !isOccupied ? (
+						<mesh key={i} position={vertex}>
+							<circleGeometry args={[0.08, 16]} />
+							<meshBasicMaterial color="#ffffff" opacity={0.3} transparent />
+						</mesh>
+					) : null;
+				})}
+
+			{/* Cursor-following pinch */}
 			{placedPinches.length < 2 && cursorPosition && (
 				<sprite
 					position={nearestVertex || cursorPosition}
 					scale={[2, 2, 1]}
 					center={
-						placedPinches.length === 0 ? LEFT_PINCH_CENTER : RIGHT_PINCH_CENTER
+						placedPinches.length === 0
+							? nearestVertex && nearestVertex.x > 0
+								? RIGHT_PINCH_CENTER
+								: LEFT_PINCH_CENTER // Show preview
+							: firstPinchIsRight
+							? LEFT_PINCH_CENTER
+							: RIGHT_PINCH_CENTER // Opposite hand
 					}
 				>
 					<spriteMaterial
-						map={placedPinches.length === 0 ? leftTexture : rightTexture}
+						map={
+							placedPinches.length === 0
+								? nearestVertex && nearestVertex.x > 0
+									? rightTexture
+									: leftTexture
+								: firstPinchIsRight
+								? leftTexture
+								: rightTexture
+						}
 					/>
 				</sprite>
 			)}
 
 			{/* Highlight nearest vertex */}
-			{nearestVertex && (
+			{placedPinches.length < 2 && nearestVertex && (
 				<mesh position={nearestVertex}>
-					<circleGeometry args={[0.05, 16]} />
+					<circleGeometry args={[0.15, 16]} />
 					<meshBasicMaterial color="#00ff00" opacity={0.5} transparent />
 				</mesh>
 			)}
@@ -147,16 +184,32 @@ function PinchTool({ gridDivisions, paperSize = 5, onCancel }) {
 					key={i}
 					position={pos}
 					scale={[2, 2, 1]}
-					center={i === 0 ? LEFT_PINCH_CENTER : RIGHT_PINCH_CENTER}
+					center={
+						i === 0
+							? firstPinchIsRight
+								? RIGHT_PINCH_CENTER
+								: LEFT_PINCH_CENTER
+							: firstPinchIsRight
+							? LEFT_PINCH_CENTER
+							: RIGHT_PINCH_CENTER
+					}
 				>
 					<spriteMaterial
-						map={i === 0 ? leftTexture : rightTexture}
+						map={
+							i === 0
+								? firstPinchIsRight
+									? rightTexture
+									: leftTexture
+								: firstPinchIsRight
+								? leftTexture
+								: rightTexture
+						}
 						transparent
 					/>
 				</sprite>
 			))}
 
-			{/* Dashed line between two pinches */}
+			{/* Dashed line */}
 			{placedPinches.length === 2 && (
 				<line>
 					<bufferGeometry>
