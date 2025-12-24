@@ -12,6 +12,7 @@ function PinchTool({ gridDivisions, paperSize = 5, onCancel }) {
 	const [placedPinches, setPlacedPinches] = useState([]);
 	const [nearestVertex, setNearestVertex] = useState(null);
 	const [firstPinchIsRight, setFirstPinchIsRight] = useState(null);
+	const [handsSwapped, setHandsSwapped] = useState(false); // ADD THIS!
 
 	const leftTexture = useTexture(leftPinchIcon);
 	const rightTexture = useTexture(rightPinchIcon);
@@ -73,8 +74,17 @@ function PinchTool({ gridDivisions, paperSize = 5, onCancel }) {
 
 	// Track cursor in 3D space
 	useFrame(() => {
-		if (placedPinches.length >= 2) return;
+		// Check if hands should swap (when both are placed)
+		if (placedPinches.length === 2) {
+			// Project both pinches to screen space
+			const screenPos1 = placedPinches[0].clone().project(camera);
+			const screenPos2 = placedPinches[1].clone().project(camera);
 
+			// If first pinch is now on the right in screen space, we should swap
+			const shouldSwap = screenPos1.x > screenPos2.x;
+			setHandsSwapped(shouldSwap); // New state!
+		}
+		if (placedPinches.length >= 2) return;
 		raycaster.setFromCamera(pointer, camera);
 		const plane = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0);
 		const intersection = new THREE.Vector3();
@@ -179,35 +189,35 @@ function PinchTool({ gridDivisions, paperSize = 5, onCancel }) {
 			)}
 
 			{/* Placed pinches */}
-			{placedPinches.map((pos, i) => (
-				<sprite
-					key={i}
-					position={pos}
-					scale={[2, 2, 1]}
-					center={
-						i === 0
-							? firstPinchIsRight
-								? RIGHT_PINCH_CENTER
-								: LEFT_PINCH_CENTER
-							: firstPinchIsRight
-							? LEFT_PINCH_CENTER
-							: RIGHT_PINCH_CENTER
-					}
-				>
-					<spriteMaterial
-						map={
-							i === 0
-								? firstPinchIsRight
-									? rightTexture
-									: leftTexture
-								: firstPinchIsRight
-								? leftTexture
-								: rightTexture
-						}
-						transparent
-					/>
-				</sprite>
-			))}
+			{placedPinches.map((pos, i) => {
+				// Determine texture based on position and swap state
+				let useRightTexture;
+				if (i === 0) {
+					// First pinch: use right if originally right, unless swapped
+					useRightTexture = handsSwapped
+						? !firstPinchIsRight
+						: firstPinchIsRight;
+				} else {
+					// Second pinch: opposite of first, unless swapped
+					useRightTexture = handsSwapped
+						? firstPinchIsRight
+						: !firstPinchIsRight;
+				}
+
+				return (
+					<sprite
+						key={i}
+						position={pos}
+						scale={[2, 2, 1]}
+						center={useRightTexture ? RIGHT_PINCH_CENTER : LEFT_PINCH_CENTER}
+					>
+						<spriteMaterial
+							map={useRightTexture ? rightTexture : leftTexture}
+							transparent
+						/>
+					</sprite>
+				);
+			})}
 
 			{/* Dashed line */}
 			{placedPinches.length === 2 && (

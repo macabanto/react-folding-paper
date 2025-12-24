@@ -15,7 +15,7 @@ function App() {
 
 	// Pinch tool state
 	const [pinchToolActive, setPinchToolActive] = useState(false);
-
+	
 	const handleTogglePinchTool = () => {
 		setPinchToolActive(!pinchToolActive);
 	};
