@@ -1,12 +1,11 @@
 import { useEffect } from 'react'
 
-function Hotkeys({ onShiftChange }) {
+function KeyEventManager({ onShiftChange }) {
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (e.key === 'Shift') {
         onShiftChange(true)
       }
-      // Future hotkeys go here
     }
     
     const handleKeyUp = (e) => {
@@ -24,7 +23,7 @@ function Hotkeys({ onShiftChange }) {
     }
   }, [onShiftChange])
 
-  return null
+  return null  // This component doesn't render anything
 }
 
-export default Hotkeys
+export default KeyEventManager

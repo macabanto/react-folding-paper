@@ -1,18 +1,21 @@
 import OrientationManager from "./OrientationManager";
-import { EdgeSegmenterButton } from "../affordances";  // NEW!
+import KeyEventManager from "./KeyEventManager";
+import { EdgeSegmenterButton } from "../affordances";
 
 function UIOverlay({
 	mainCameraRef,
 	isShiftHeld,
 	onShiftChange,
-	rulerToolActive,
-	rulerDivisions,
-	onToggleRuler,
+	edgeSegmenterActive,
+	segmentDivisions,
+	onToggleEdgeSegmenter,
 	onIncrementDivisions,
 	onDecrementDivisions,
 }) {
 	return (
 		<>
+			<KeyEventManager onShiftChange={onShiftChange} />
+
 			<div
 				style={{
 					position: "absolute",
@@ -25,9 +28,9 @@ function UIOverlay({
 				}}
 			>
 				<EdgeSegmenterButton
-					isActive={rulerToolActive}
-					divisions={rulerDivisions}
-					onToggle={onToggleRuler}
+					isActive={edgeSegmenterActive}
+					divisions={segmentDivisions}
+					onToggle={onToggleEdgeSegmenter}
 					onIncrementDivisions={onIncrementDivisions}
 					onDecrementDivisions={onDecrementDivisions}
 				/>
