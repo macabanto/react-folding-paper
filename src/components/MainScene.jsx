@@ -1,13 +1,19 @@
-import CustomGrid from "./CustomGrid";
+import { EdgeSegmenterTool } from '../affordances'  // NEW!
+import * as THREE from 'three'
 
-function MainScene({ gridVisible, gridDivisions }) {
+// EdgeMarks component stays the same
+function EdgeMarks({ edgeName, marks, paperSize = 5 }) {
+  // ... existing code ...
+}
+
+function MainScene({ rulerToolActive, rulerDivisions, rulerMarks, onMarkPlaced, onToggleRuler }) {
 	return (
 		<>
 			{/* Lighting */}
 			<ambientLight intensity={0.6} />
 			<directionalLight position={[10, 10, 10]} intensity={0.8} />
 
-			{/* Paper - Red front, Blue back */}
+			{/* Paper */}
 			<mesh position={[0, 0, 0]}>
 				<planeGeometry args={[5, 5]} />
 				<meshStandardMaterial
@@ -28,13 +34,13 @@ function MainScene({ gridVisible, gridDivisions }) {
 				/>
 			</mesh>
 
-			{/* Custom Grid with separate X/Y divisions */}
-			{gridVisible && (
-				<CustomGrid
-					divisionsX={gridDivisions.x}
-					divisionsY={gridDivisions.y}
-					size={5} // Match paper size (was 10)
-					color={0xcccccc}
+			{/* Edge Segmenter Tool */}
+			{rulerToolActive && (
+				<EdgeSegmenterTool
+					divisions={rulerDivisions}
+					paperSize={5}
+					onMarkPlaced={onMarkPlaced}
+					onCancel={onToggleRuler}
 				/>
 			)}
 		</>

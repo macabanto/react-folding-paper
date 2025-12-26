@@ -1,21 +1,53 @@
 import { useRef, useState } from "react";
 import { Canvas } from "@react-three/fiber";
 import MainScene from "./components/MainScene";
-import Controls from "./components/Controls";
+import CanvasControls from "./components/CanvasControls";  // NEW!
 import UIOverlay from "./components/UIOverlay";
 import "./App.css";
 
 function App() {
 	const mainCameraRef = useRef();
 	const [isShiftHeld, setIsShiftHeld] = useState(false);
+
+	// EdgeSegmenter state
+	const [edgeSegmenterActive, setEdgeSegmenterActive] = useState(false);
+	const [segmentDivisions, setSegmentDivisions] = useState(2);
 	
-	// Grid state
-	const [gridVisible, setGridVisible] = useState(true);
-	const [gridDivisions, setGridDivisions] = useState({ x: 10, y: 10 });
+	// Segment marks storage
+	const [segmentMarks, setSegmentMarks] = useState({
+		top: [],
+		bottom: [],
+		left: [],
+		right: []
+	});
+
+	const handleToggleEdgeSegmenter = () => {
+		setEdgeSegmenterActive(!edgeSegmenterActive);
+	};
+
+	const handleIncrementDivisions = () => {
+		setSegmentDivisions((prev) => Math.min(prev + 1, 20));
+	};
+
+	const handleDecrementDivisions = () => {
+		setSegmentDivisions((prev) => Math.max(prev - 1, 2));
+	};
+
+	const handleMarkPlaced = (edgeName, divisions) => {
+		const marks = [];
+		for (let i = 1; i < divisions; i++) {
+			const t = i / divisions;
+			marks.push({ t, divisions });
+		}
+		
+		setSegmentMarks(prev => ({
+			...prev,
+			[edgeName]: marks
+		}));
+	};
 
 	return (
 		<>
-			{/* Main Scene Canvas */}
 			<Canvas
 				camera={{ position: [5, 5, 5], fov: 75 }}
 				style={{
@@ -30,21 +62,24 @@ function App() {
 				}}
 			>
 				<MainScene 
-					gridVisible={gridVisible}
-					gridDivisions={gridDivisions}
+					edgeSegmenterActive={edgeSegmenterActive}
+					segmentDivisions={segmentDivisions}
+					segmentMarks={segmentMarks}
+					onMarkPlaced={handleMarkPlaced}
+					onToggleEdgeSegmenter={handleToggleEdgeSegmenter}
 				/>
-				<Controls isShiftHeld={isShiftHeld} />
+				<CanvasControls isShiftHeld={isShiftHeld} />
 			</Canvas>
 
-			{/* UI Overlay */}
 			<UIOverlay 
 				mainCameraRef={mainCameraRef} 
 				isShiftHeld={isShiftHeld}
 				onShiftChange={setIsShiftHeld}
-				gridVisible={gridVisible}
-				gridDivisions={gridDivisions}
-				onToggleGrid={setGridVisible}
-				onDivisionsChange={setGridDivisions}
+				edgeSegmenterActive={edgeSegmenterActive}
+				segmentDivisions={segmentDivisions}
+				onToggleEdgeSegmenter={handleToggleEdgeSegmenter}
+				onIncrementDivisions={handleIncrementDivisions}
+				onDecrementDivisions={handleDecrementDivisions}
 			/>
 		</>
 	);

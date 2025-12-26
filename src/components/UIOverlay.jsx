@@ -1,44 +1,44 @@
-import OrientationManager from './OrientationManager'
-import GridManager from './GridManager'
-import Hotkeys from './Hotkeys'
+import OrientationManager from "./OrientationManager";
+import { EdgeSegmenterButton } from "../affordances";  // NEW!
 
-function UIOverlay({ 
-  mainCameraRef, 
-  isShiftHeld, 
-  onShiftChange,
-  gridVisible,
-  gridDivisions,
-  onToggleGrid,
-  onDivisionsChange
+function UIOverlay({
+	mainCameraRef,
+	isShiftHeld,
+	onShiftChange,
+	rulerToolActive,
+	rulerDivisions,
+	onToggleRuler,
+	onIncrementDivisions,
+	onDecrementDivisions,
 }) {
-  return (
-    <>
-      <Hotkeys onShiftChange={onShiftChange} />
-      
-      {/* Bottom-right: Orientation tools */}
-      <div style={{
-        position: 'absolute',
-        bottom: '50px',
-        right: '50px',
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '20px',
-        alignItems: 'flex-end'
-      }}>
-        <GridManager
-          gridVisible={gridVisible}
-          gridDivisions={gridDivisions}
-          onToggleGrid={onToggleGrid}
-          onDivisionsChange={onDivisionsChange}
-        />
-        
-        <OrientationManager 
-          mainCameraRef={mainCameraRef} 
-          isShiftHeld={isShiftHeld} 
-        />
-      </div>
-    </>
-  )
+	return (
+		<>
+			<div
+				style={{
+					position: "absolute",
+					bottom: "50px",
+					right: "50px",
+					display: "flex",
+					flexDirection: "column",
+					gap: "20px",
+					alignItems: "flex-end",
+				}}
+			>
+				<EdgeSegmenterButton
+					isActive={rulerToolActive}
+					divisions={rulerDivisions}
+					onToggle={onToggleRuler}
+					onIncrementDivisions={onIncrementDivisions}
+					onDecrementDivisions={onDecrementDivisions}
+				/>
+
+				<OrientationManager
+					mainCameraRef={mainCameraRef}
+					isShiftHeld={isShiftHeld}
+				/>
+			</div>
+		</>
+	);
 }
 
-export default UIOverlay
+export default UIOverlay;

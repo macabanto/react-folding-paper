@@ -1,27 +1,33 @@
 import { useRef, useEffect } from 'react'
-import { useThree, useFrame } from '@react-three/fiber'
+import { extend, useThree, useFrame } from '@react-three/fiber'
 import CustomTrackballControls from './CustomTrackballControls'
 
-function SceneControls() {
+extend({ CustomTrackballControls })
+
+function SceneControls({ isShiftHeld }) {
   const controlsRef = useRef()
   const { camera, gl } = useThree()
 
   useEffect(() => {
-    const controls = new CustomTrackballControls(camera, gl.domElement)
-    controls.rotateSpeed = 2.0
-    controls.target.set(0, 0, 0)
-    controlsRef.current = controls
-
-    return () => {
-      controls.dispose()
+    if (controlsRef.current) {
+      controlsRef.current.object = camera
+      controlsRef.current.domElement = gl.domElement
     }
   }, [camera, gl])
 
   useFrame(() => {
-    controlsRef.current?.update()
+    if (controlsRef.current) {
+      controlsRef.current.update()
+    }
   })
 
-  return null
+  return (
+    <customTrackballControls 
+      ref={controlsRef}
+      args={[camera, gl.domElement]}
+      isShiftHeld={isShiftHeld}
+    />
+  )
 }
 
 export default SceneControls
