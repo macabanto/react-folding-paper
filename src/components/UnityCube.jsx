@@ -63,7 +63,7 @@ function UnityCube({ mainCameraRef }) {
 			viewName = normal.z > 0 ? "front" : "back";
 		}
 
-		console.log("Clicked face:", viewName);
+		//console.log("Clicked face:", viewName);
 
 		// Calculate current distance from origin
 		const currentDistance = mainCameraRef.current.position.length();

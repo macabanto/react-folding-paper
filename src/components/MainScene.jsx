@@ -1,46 +1,45 @@
-import { EdgeSegmenterTool } from '../affordances'  // NEW!
-import * as THREE from 'three'
+import { EdgeSegmenterTool } from "../affordances";
+import CustomPaperGeometry from "./CustomPaperGeometry";  // FIX: relative path
+import * as THREE from "three";
 
-// EdgeMarks component stays the same
-function EdgeMarks({ edgeName, marks, paperSize = 5 }) {
-  // ... existing code ...
-}
-
-function MainScene({ rulerToolActive, rulerDivisions, rulerMarks, onMarkPlaced, onToggleRuler }) {
+function MainScene({
+	edgeSegmenterActive,     // FIX: prop name
+	segmentDivisions,        // FIX: prop name
+	segmentMarks,            // FIX: add this
+	onMarkPlaced,
+	onToggleEdgeSegmenter,   // FIX: prop name
+}) {
 	return (
 		<>
 			{/* Lighting */}
 			<ambientLight intensity={0.6} />
 			<directionalLight position={[10, 10, 10]} intensity={0.8} />
 
-			{/* Paper */}
-			<mesh position={[0, 0, 0]}>
-				<planeGeometry args={[5, 5]} />
-				<meshStandardMaterial
-					color="#ff4760"
-					side={0}
-					roughness={0.8}
-					metalness={0.1}
-				/>
-			</mesh>
+			{/* Paper - Front (red) */}
+			<CustomPaperGeometry
+				segmentMarks={segmentMarks}
+				width={5}
+				height={5}
+				color="#ff4760"
+				side={0}
+			/>
 
-			<mesh position={[0, 0, 0]}>
-				<planeGeometry args={[5, 5]} />
-				<meshStandardMaterial
-					color="#78aeff"
-					side={1}
-					roughness={0.8}
-					metalness={0.1}
-				/>
-			</mesh>
+			{/* Paper - Back (blue) */}
+			<CustomPaperGeometry
+				segmentMarks={segmentMarks}
+				width={5}
+				height={5}
+				color="#78aeff"
+				side={1}
+			/>
 
 			{/* Edge Segmenter Tool */}
-			{rulerToolActive && (
+			{edgeSegmenterActive && (
 				<EdgeSegmenterTool
-					divisions={rulerDivisions}
+					divisions={segmentDivisions}
 					paperSize={5}
 					onMarkPlaced={onMarkPlaced}
-					onCancel={onToggleRuler}
+					onCancel={onToggleEdgeSegmenter}
 				/>
 			)}
 		</>
