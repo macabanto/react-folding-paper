@@ -6,6 +6,7 @@ function MainScene({
 	edgeSegmenterActive,
 	segmentDivisions,
 	segmentMarks,
+	markIdCounter,  // NEW!
 	onMarkPlaced,
 	onToggleEdgeSegmenter,
 }) {
@@ -39,6 +40,7 @@ function MainScene({
 				<EdgeSegmenterTool
 					divisions={segmentDivisions}
 					paperSize={5}
+					markIdCounter={markIdCounter}  // NEW!
 					onMarkPlaced={onMarkPlaced}
 					onCancel={onToggleEdgeSegmenter}
 				/>

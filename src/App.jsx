@@ -8,7 +8,7 @@ import "./App.css";
 function App() {
 	const mainCameraRef = useRef();
 	const [isShiftHeld, setIsShiftHeld] = useState(false);
-	const markIdCounter = useRef(0);  // ← MOVED INSIDE with useRef!
+	const markIdCounter = useRef(0); // ← MOVED INSIDE with useRef!
 
 	// EdgeSegmenter state
 	const [edgeSegmenterActive, setEdgeSegmenterActive] = useState(false);
@@ -29,33 +29,17 @@ function App() {
 		setSegmentDivisions((prev) => Math.max(prev - 1, 2));
 	};
 
-	const handleMarkPlaced = (v1, v2, divisions) => {
+	const handleMarkPlaced = (newMarks) => {
 		console.log("=== MARK PLACEMENT ===");
-		console.log("Edge vertices:", v1, v2);
-		console.log("Divisions:", divisions);
+		console.log("New marks:", newMarks);
 
-		// Calculate new marks
-		const newMarks = [];
-		for (let i = 1; i < divisions; i++) {
-			const t = i / divisions;
-			newMarks.push({
-				id: `mark-${markIdCounter.current++}`,  // ← Now works with .current!
-				v1,
-				v2,
-				t,
-				divisions,
-				active: true,
-			});
-		}
-
-		console.log("New marks to set:", newMarks);
-
-		// Mark old marks as inactive instead of removing them
+		// Deactivate old marks on same edge
 		setSegmentMarks((prev) => {
+			if (newMarks.length === 0) return prev;
+
+			const { v1, v2 } = newMarks[0]; // Get edge from first mark
 			const updated = prev.map((m) =>
-				m.v1 === v1 && m.v2 === v2
-					? { ...m, active: false }
-					: m
+				m.v1 === v1 && m.v2 === v2 ? { ...m, active: false } : m
 			);
 			return [...updated, ...newMarks];
 		});
@@ -80,6 +64,7 @@ function App() {
 					edgeSegmenterActive={edgeSegmenterActive}
 					segmentDivisions={segmentDivisions}
 					segmentMarks={segmentMarks}
+					markIdCounter={markIdCounter}
 					onMarkPlaced={handleMarkPlaced}
 					onToggleEdgeSegmenter={handleToggleEdgeSegmenter}
 				/>
