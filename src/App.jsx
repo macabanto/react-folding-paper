@@ -1,25 +1,21 @@
 import { useRef, useState } from "react";
 import { Canvas } from "@react-three/fiber";
 import MainScene from "./components/MainScene";
-import CanvasControls from "./components/CanvasControls";  // NEW!
+import CanvasControls from "./components/CanvasControls";
 import UIOverlay from "./components/UIOverlay";
 import "./App.css";
 
 function App() {
 	const mainCameraRef = useRef();
 	const [isShiftHeld, setIsShiftHeld] = useState(false);
+	const markIdCounter = useRef(0);  // ← MOVED INSIDE with useRef!
 
 	// EdgeSegmenter state
 	const [edgeSegmenterActive, setEdgeSegmenterActive] = useState(false);
 	const [segmentDivisions, setSegmentDivisions] = useState(2);
-	
+
 	// Segment marks storage
-	const [segmentMarks, setSegmentMarks] = useState({
-		top: [],
-		bottom: [],
-		left: [],
-		right: []
-	});
+	const [segmentMarks, setSegmentMarks] = useState([]);
 
 	const handleToggleEdgeSegmenter = () => {
 		setEdgeSegmenterActive(!edgeSegmenterActive);
@@ -33,17 +29,36 @@ function App() {
 		setSegmentDivisions((prev) => Math.max(prev - 1, 2));
 	};
 
-	const handleMarkPlaced = (edgeName, divisions) => {
-		const marks = [];
+	const handleMarkPlaced = (v1, v2, divisions) => {
+		console.log("=== MARK PLACEMENT ===");
+		console.log("Edge vertices:", v1, v2);
+		console.log("Divisions:", divisions);
+
+		// Calculate new marks
+		const newMarks = [];
 		for (let i = 1; i < divisions; i++) {
 			const t = i / divisions;
-			marks.push({ t, divisions });
+			newMarks.push({
+				id: `mark-${markIdCounter.current++}`,  // ← Now works with .current!
+				v1,
+				v2,
+				t,
+				divisions,
+				active: true,
+			});
 		}
-		
-		setSegmentMarks(prev => ({
-			...prev,
-			[edgeName]: marks
-		}));
+
+		console.log("New marks to set:", newMarks);
+
+		// Mark old marks as inactive instead of removing them
+		setSegmentMarks((prev) => {
+			const updated = prev.map((m) =>
+				m.v1 === v1 && m.v2 === v2
+					? { ...m, active: false }
+					: m
+			);
+			return [...updated, ...newMarks];
+		});
 	};
 
 	return (
@@ -61,7 +76,7 @@ function App() {
 					mainCameraRef.current = camera;
 				}}
 			>
-				<MainScene 
+				<MainScene
 					edgeSegmenterActive={edgeSegmenterActive}
 					segmentDivisions={segmentDivisions}
 					segmentMarks={segmentMarks}
@@ -71,8 +86,8 @@ function App() {
 				<CanvasControls isShiftHeld={isShiftHeld} />
 			</Canvas>
 
-			<UIOverlay 
-				mainCameraRef={mainCameraRef} 
+			<UIOverlay
+				mainCameraRef={mainCameraRef}
 				isShiftHeld={isShiftHeld}
 				onShiftChange={setIsShiftHeld}
 				edgeSegmenterActive={edgeSegmenterActive}

@@ -10,4 +10,4 @@ function CanvasControls({ isShiftHeld }) {
   )
 }
 
-export default CanvasControls  // ADD THIS!
+export default CanvasControls;

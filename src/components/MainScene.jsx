@@ -1,13 +1,13 @@
-import { EdgeSegmenterTool } from "../affordances";
-import CustomPaperGeometry from "./CustomPaperGeometry";  // FIX: relative path
-import * as THREE from "three";
+import { EdgeSegmenterTool } from "../affordances"
+import CustomPaperGeometry from "./CustomPaperGeometry"
+import EdgeMarks from "./EdgeMarks"
 
 function MainScene({
-	edgeSegmenterActive,     // FIX: prop name
-	segmentDivisions,        // FIX: prop name
-	segmentMarks,            // FIX: add this
+	edgeSegmenterActive,
+	segmentDivisions,
+	segmentMarks,
 	onMarkPlaced,
-	onToggleEdgeSegmenter,   // FIX: prop name
+	onToggleEdgeSegmenter,
 }) {
 	return (
 		<>
@@ -15,7 +15,7 @@ function MainScene({
 			<ambientLight intensity={0.6} />
 			<directionalLight position={[10, 10, 10]} intensity={0.8} />
 
-			{/* Paper - Front (red) */}
+			{/* Paper */}
 			<CustomPaperGeometry
 				segmentMarks={segmentMarks}
 				width={5}
@@ -23,8 +23,6 @@ function MainScene({
 				color="#ff4760"
 				side={0}
 			/>
-
-			{/* Paper - Back (blue) */}
 			<CustomPaperGeometry
 				segmentMarks={segmentMarks}
 				width={5}
@@ -32,6 +30,9 @@ function MainScene({
 				color="#78aeff"
 				side={1}
 			/>
+
+			{/* Visual marks */}
+			<EdgeMarks segmentMarks={segmentMarks} paperWidth={5} paperHeight={5} />
 
 			{/* Edge Segmenter Tool */}
 			{edgeSegmenterActive && (
@@ -43,7 +44,7 @@ function MainScene({
 				/>
 			)}
 		</>
-	);
+	)
 }
 
-export default MainScene;
+export default MainScene
