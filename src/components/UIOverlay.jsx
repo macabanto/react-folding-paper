@@ -1,6 +1,6 @@
 import OrientationManager from "./OrientationManager";
 import KeyEventManager from "./KeyEventManager";
-import { EdgeSegmenterButton } from "../affordances";
+import { EdgeSegmenterButton, CreaserButton } from "../affordances";
 
 function UIOverlay({
 	mainCameraRef,
@@ -9,6 +9,8 @@ function UIOverlay({
 	edgeSegmenterActive,
 	segmentDivisions,
 	onToggleEdgeSegmenter,
+	creaserActive,
+	onToggleCreaser,
 	onIncrementDivisions,
 	onDecrementDivisions,
 }) {
@@ -27,6 +29,10 @@ function UIOverlay({
 					alignItems: "flex-end",
 				}}
 			>
+				<CreaserButton 
+					isActive={creaserActive} 
+					onToggle={onToggleCreaser} 
+				/>
 				<EdgeSegmenterButton
 					isActive={edgeSegmenterActive}
 					divisions={segmentDivisions}

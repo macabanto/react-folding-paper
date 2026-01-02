@@ -1,35 +1,42 @@
 // EdgeMarks.jsx
-import * as THREE from 'three'
+import * as THREE from "three";
 
-function EdgeMarks({ segmentMarks, paperWidth = 5, paperHeight = 5 }) {
-	const halfWidth = paperWidth / 2
-	const halfHeight = paperHeight / 2
-
-	// Vertex positions (matches PaperGeometry initial state)
-	const vertexPositions = [
-		new THREE.Vector3(-halfWidth, -halfHeight, 0),  // v0
-		new THREE.Vector3(halfWidth, -halfHeight, 0),   // v1
-		new THREE.Vector3(halfWidth, halfHeight, 0),    // v2
-		new THREE.Vector3(-halfWidth, halfHeight, 0),   // v3
-	]
+// EdgeMarks.jsx - update to use vertexPool
+function EdgeMarks({ vertexPool, paperWidth = 5, paperHeight = 5 }) {
+	// Filter for active staged/committed marks
+	const activeMarks = vertexPool.filter(
+		(v) => v.type === "mark" && v.active && v.state !== "inactive"
+	);
 
 	return (
 		<group>
-			{segmentMarks.filter(mark => mark.active).map(mark => {
-				// Get edge start/end from vertex indices
-				const start = vertexPositions[mark.v1]
-				const end = vertexPositions[mark.v2]
-				
-				// Calculate mark position
-				const position = new THREE.Vector3().lerpVectors(start, end, mark.t)
-				
+			{activeMarks.map((mark) => {
+				const position = new THREE.Vector3(...mark.position);
+
+				// FIX: Find corner vertices by constructing their IDs
+				const v1 = vertexPool.find((v) => v.id === `v${mark.edge[0]}`);
+				const v2 = vertexPool.find((v) => v.id === `v${mark.edge[1]}`);
+
+				if (!v1 || !v2) {
+					console.warn("Could not find vertices for mark:", mark);
+					return null;
+				}
+
 				// Calculate perpendicular direction
-				const edgeDir = new THREE.Vector3().subVectors(end, start).normalize()
-				const perpDir = new THREE.Vector3(-edgeDir.y, edgeDir.x, 0)
-				
-				const markLength = 0.2
-				const markStart = position.clone().add(perpDir.clone().multiplyScalar(markLength))
-				const markEnd = position.clone().sub(perpDir.clone().multiplyScalar(markLength))
+				const v1Pos = new THREE.Vector3(...v1.position);
+				const v2Pos = new THREE.Vector3(...v2.position);
+				const edgeDir = new THREE.Vector3()
+					.subVectors(v2Pos, v1Pos)
+					.normalize();
+				const perpDir = new THREE.Vector3(-edgeDir.y, edgeDir.x, 0);
+
+				const markLength = 0.2;
+				const markStart = position
+					.clone()
+					.add(perpDir.clone().multiplyScalar(markLength));
+				const markEnd = position
+					.clone()
+					.sub(perpDir.clone().multiplyScalar(markLength));
 
 				return (
 					<line key={mark.id}>
@@ -48,10 +55,10 @@ function EdgeMarks({ segmentMarks, paperWidth = 5, paperHeight = 5 }) {
 						</bufferGeometry>
 						<lineBasicMaterial color="#ffffff" linewidth={2} />
 					</line>
-				)
+				);
 			})}
 		</group>
-	)
+	);
 }
 
-export default EdgeMarks
+export default EdgeMarks;

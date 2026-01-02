@@ -14,11 +14,49 @@ function App() {
 	const [edgeSegmenterActive, setEdgeSegmenterActive] = useState(false);
 	const [segmentDivisions, setSegmentDivisions] = useState(2);
 
-	// Segment marks storage
-	const [segmentMarks, setSegmentMarks] = useState([]);
+	// Creaser state
+	const [creaserActive, setCreaserActive] = useState(false);
+	const [creases, setCreases] = useState([]);
+	const creaseIdCounter = useRef(0); // For unique crease IDs
 
+	// Vertex lifecycle storage
+	const [vertexPool, setVertexPool] = useState([
+		// Initial corners
+		{
+			id: "v0",
+			position: [-2.5, -2.5, 0],
+			state: "committed",
+			type: "corner",
+			createdBy: "initial",
+		},
+		{
+			id: "v1",
+			position: [2.5, -2.5, 0],
+			state: "committed",
+			type: "corner",
+			createdBy: "initial",
+		},
+		{
+			id: "v2",
+			position: [2.5, 2.5, 0],
+			state: "committed",
+			type: "corner",
+			createdBy: "initial",
+		},
+		{
+			id: "v3",
+			position: [-2.5, 2.5, 0],
+			state: "committed",
+			type: "corner",
+			createdBy: "initial",
+		},
+	]);
 	const handleToggleEdgeSegmenter = () => {
 		setEdgeSegmenterActive(!edgeSegmenterActive);
+	};
+
+	const handleToggleCreaser = () => {
+		setCreaserActive(!creaserActive);
 	};
 
 	const handleIncrementDivisions = () => {
@@ -33,22 +71,73 @@ function App() {
 		console.log("=== MARK PLACEMENT ===");
 		console.log("New marks:", newMarks);
 
-		// Deactivate old marks on same edge
-		setSegmentMarks((prev) => {
+		setVertexPool((prev) => {
 			if (newMarks.length === 0) return prev;
 
 			const { v1, v2 } = newMarks[0]; // Get edge from first mark
-			const updated = prev.map((m) =>
-				m.v1 === v1 && m.v2 === v2 ? { ...m, active: false } : m
+
+			// Deactivate old marks on same edge
+			const updated = prev.map((vertex) =>
+				vertex.type === "mark" &&
+				vertex.edge &&
+				vertex.edge[0] === v1 &&
+				vertex.edge[1] === v2
+					? { ...vertex, active: false }
+					: vertex
 			);
-			return [...updated, ...newMarks];
+
+			// Convert marks to staged vertices
+			const stagedVertices = newMarks.map((mark) => ({
+				...mark,
+				position: calculateMarkPosition(v1, v2, mark.t),
+				state: "staged",
+				type: "mark",
+				edge: [v1, v2],
+			}));
+
+			return [...updated, ...stagedVertices];
 		});
+	};
+
+	// Helper function
+	const calculateMarkPosition = (v1, v2, t) => {
+		const cornerPositions = [
+			[-2.5, -2.5, 0],
+			[2.5, -2.5, 0],
+			[2.5, 2.5, 0],
+			[-2.5, 2.5, 0],
+		];
+
+		const pos1 = cornerPositions[v1];
+		const pos2 = cornerPositions[v2];
+
+		return [
+			pos1[0] + (pos2[0] - pos1[0]) * t,
+			pos1[1] + (pos2[1] - pos1[1]) * t,
+			pos1[2] + (pos2[2] - pos1[2]) * t,
+		];
+	};
+
+	const handleCreaseCreated = (point1, point2) => {
+		console.log("=== CREASE CREATED ===");
+		console.log("Point 1:", point1);
+		console.log("Point 2:", point2);
+
+		const newCrease = {
+			id: `crease-${creaseIdCounter.current++}`,
+			point1,
+			point2,
+			type: "neutral", // Default type
+		};
+
+		setCreases((prev) => [...prev, newCrease]);
+		console.log("Crease stored:", newCrease);
 	};
 
 	return (
 		<>
 			<Canvas
-				camera={{ position: [5, 5, 5], fov: 75 }}
+				camera={{ position: [0,0,8], fov: 45 }}
 				style={{
 					position: "absolute",
 					top: 0,
@@ -63,10 +152,14 @@ function App() {
 				<MainScene
 					edgeSegmenterActive={edgeSegmenterActive}
 					segmentDivisions={segmentDivisions}
-					segmentMarks={segmentMarks}
+					vertexPool={vertexPool}
 					markIdCounter={markIdCounter}
 					onMarkPlaced={handleMarkPlaced}
 					onToggleEdgeSegmenter={handleToggleEdgeSegmenter}
+					creaserActive={creaserActive}
+					onCreaseCreated={handleCreaseCreated}
+					onToggleCreaser={handleToggleCreaser}
+					creases={creases}
 				/>
 				<CanvasControls isShiftHeld={isShiftHeld} />
 			</Canvas>
@@ -80,6 +173,8 @@ function App() {
 				onToggleEdgeSegmenter={handleToggleEdgeSegmenter}
 				onIncrementDivisions={handleIncrementDivisions}
 				onDecrementDivisions={handleDecrementDivisions}
+				onToggleCreaser={handleToggleCreaser}
+				creaserActive={creaserActive}
 			/>
 		</>
 	);
